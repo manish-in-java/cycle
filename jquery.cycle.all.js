@@ -1,8 +1,8 @@
 /*!
  * jQuery Cycle Plugin (with Transition Definitions)
  * Examples and documentation at: http://jquery.malsup.com/cycle/
- * Copyright (c) 2007-2013 M. Alsup
- * Version: 3.0.3 (11-JUL-2013)
+ * Copyright (c) 2007-2017 M. Alsup
+ * Version: 3.0.4 (27-AUG-2017)
  * Dual licensed under the MIT and GPL licenses.
  * http://jquery.malsup.com/license.html
  * Requires: jQuery v1.7.1 or later
@@ -10,12 +10,12 @@
 ;(function($, undefined) {
 "use strict";
 
-var ver = '3.0.3';
+var ver = '3.0.4';
 
 function debug(s) {
 	if ($.fn.cycle.debug)
 		log(s);
-}		
+}
 function log() {
 	/*global console */
 	if (window.console && console.log)
@@ -60,7 +60,7 @@ $.fn.cycle = function(options, arg2) {
 			return;
 
 		opts.updateActivePagerLink = opts.updateActivePagerLink || $.fn.cycle.updateActivePagerLink;
-		
+
 		// stop existing slideshow for this container (if there is one)
 		if (this.cycleTimeout)
 			clearTimeout(this.cycleTimeout);
@@ -148,7 +148,7 @@ function handleArguments(cont, options, arg2) {
 				log('options not found, "prev/next" ignored');
 				return false;
 			}
-			if (typeof arg2 == 'string') 
+			if (typeof arg2 == 'string')
 				opts.oneTimeFx = arg2;
 			$.fn.cycle[options](opts);
 			return false;
@@ -180,7 +180,7 @@ function handleArguments(cont, options, arg2) {
 		return false;
 	}
 	return options;
-	
+
 	function checkInstantResume(isPaused, arg2, cont) {
 		if (!isPaused && arg2 === true) { // resume now!
 			var options = $(cont).data('cycle.opts');
@@ -210,7 +210,7 @@ function destroy(cont, opts) {
 		$(opts.next).unbind(opts.prevNextEvent);
 	if (opts.prev)
 		$(opts.prev).unbind(opts.prevNextEvent);
-	
+
 	if (opts.pager || opts.pagerAnchorBuilder)
 		$.each(opts.pagerAnchors || [], function() {
 			this.unbind().remove();
@@ -256,7 +256,7 @@ function buildOptions($cont, $slides, els, options, o) {
 	if ($cont.css('position') == 'static')
 		$cont.css('position', 'relative');
 	if (opts.width)
-		$cont.width(opts.width);
+		$cont.css("width", opts.width);
 	if (opts.height && opts.height != 'auto')
 		$cont.height(opts.height);
 
@@ -264,7 +264,7 @@ function buildOptions($cont, $slides, els, options, o) {
 		opts.startingSlide = parseInt(opts.startingSlide,10);
 		if (opts.startingSlide >= els.length || opts.startSlide < 0)
 			opts.startingSlide = 0; // catch bogus input
-		else 
+		else
 			startingSlideSpecified = true;
 	}
 	else if (opts.backwards)
@@ -357,13 +357,13 @@ function buildOptions($cont, $slides, els, options, o) {
 			});
 		});
 	}
-		
+
 	// stretch container
 	var reshape = (opts.containerResize || opts.containerResizeHeight) && $cont.innerHeight() < 1;
 	if (reshape) { // do this only if container has no size http://tinyurl.com/da2oa9
 		var maxw = 0, maxh = 0;
 		for(var j=0; j < els.length; j++) {
-			var $e = $(els[j]), e = $e[0], w = $e.outerWidth(), h = $e.outerHeight();
+			var $e = $(els[j]), e = $e[0], w = $e.outerWidth(opts.widthIncludesMargin), h = $e.outerHeight(opts.heightIncludesMargin);
 			if (!w) w = e.offsetWidth || e.width || $e.attr('width');
 			if (!h) h = e.offsetHeight || e.height || $e.attr('height');
 			maxw = w > maxw ? w : maxw;
@@ -437,7 +437,7 @@ function buildOptions($cont, $slides, els, options, o) {
 			opts.speed = $.fx.speeds[opts.speed] || parseInt(opts.speed,10);
 		if (!opts.sync)
 			opts.speed = opts.speed / 2;
-		
+
 		var buffer = opts.fx == 'none' ? 0 : opts.fx == 'shuffle' ? 500 : 250;
 		while((opts.timeout - opts.speed) < buffer) // sanitize timeout
 			opts.timeout += opts.speed;
@@ -695,7 +695,7 @@ function go(els, opts, manual, fwd) {
 		};
 
 		debug('tx firing('+fx+'); currSlide: ' + opts.currSlide + '; nextSlide: ' + opts.nextSlide);
-		
+
 		// get ready to perform the transition
 		opts.busy = 1;
 		if (opts.fxFn) // fx function provided?
@@ -750,7 +750,7 @@ function go(els, opts, manual, fwd) {
 	}
 	if (changed && opts.pager)
 		opts.updateActivePagerLink(opts.pager, opts.currSlide, opts.activePagerClass);
-	
+
 	function queueNext() {
 		// stage the next transition
 		var ms = 0, timeout = opts.timeout;
@@ -847,7 +847,7 @@ $.fn.cycle.createPagerAnchor = function(i, el, $p, els, opts) {
 	}
 	else
 		a = '<a href="#">'+(i+1)+'</a>';
-		
+
 	if (!a)
 		return;
 	var $a = $(a);
@@ -869,7 +869,7 @@ $.fn.cycle.createPagerAnchor = function(i, el, $p, els, opts) {
 
 	opts.pagerAnchors =  opts.pagerAnchors || [];
 	opts.pagerAnchors.push($a);
-	
+
 	var pagerFn = function(e) {
 		e.preventDefault();
 		opts.nextSlide = i;
@@ -884,30 +884,30 @@ $.fn.cycle.createPagerAnchor = function(i, el, $p, els, opts) {
 		go(els,opts,1,opts.currSlide < i); // trigger the trans
 //		return false; // <== allow bubble
 	};
-	
+
 	if ( /mouseenter|mouseover/i.test(opts.pagerEvent) ) {
 		$a.hover(pagerFn, function(){/* no-op */} );
 	}
 	else {
 		$a.bind(opts.pagerEvent, pagerFn);
 	}
-	
+
 	if ( ! /^click/.test(opts.pagerEvent) && !opts.allowPagerClickBubble)
 		$a.bind('click.cycle', function(){return false;}); // suppress click
-	
+
 	var cont = opts.$cont[0];
 	var pauseFlag = false; // https://github.com/malsup/cycle/issues/44
 	if (opts.pauseOnPagerHover) {
 		$a.hover(
-			function() { 
+			function() {
 				pauseFlag = true;
-				cont.cyclePause++; 
+				cont.cyclePause++;
 				triggerPause(cont,true,true);
-			}, function() { 
+			}, function() {
 				if (pauseFlag)
-					cont.cyclePause--; 
+					cont.cyclePause--;
 				triggerPause(cont,true,true);
-			} 
+			}
 		);
 	}
 };
@@ -980,7 +980,7 @@ $.fn.cycle.custom = function(curr, next, opts, cb, fwd, speedOverride) {
 	};
 	$l.delay(animOutDelay).animate(opts.animOut, speedOut, easeOut, function() {
 		$l.css(opts.cssAfter);
-		if (!opts.sync) 
+		if (!opts.sync)
 			fn();
 	});
 	if (opts.sync) fn();
@@ -1004,67 +1004,69 @@ $.fn.cycle.ver = function() { return ver; };
 
 // override these globally if you like (they are all optional)
 $.fn.cycle.defaults = {
-    activePagerClass: 'activeSlide', // class name used for the active pager link
-    after:            null,     // transition callback (scope set to element that was shown):  function(currSlideElement, nextSlideElement, options, forwardFlag)
-    allowPagerClickBubble: false, // allows or prevents click event on pager anchors from bubbling
-    animIn:           null,     // properties that define how the slide animates in
-    animInDelay:      0,        // allows delay before next slide transitions in	
-    animOut:          null,     // properties that define how the slide animates out
-    animOutDelay:     0,        // allows delay before current slide transitions out
-    aspect:           false,    // preserve aspect ratio during fit resizing, cropping if necessary (must be used with fit option)
-    autostop:         0,        // true to end slideshow after X transitions (where X == slide count)
-    autostopCount:    0,        // number of transitions (optionally used with autostop to define X)
-    backwards:        false,    // true to start slideshow at last slide and move backwards through the stack
-    before:           null,     // transition callback (scope set to element to be shown):     function(currSlideElement, nextSlideElement, options, forwardFlag)
-    center:           null,     // set to true to have cycle add top/left margin to each slide (use with width and height options)
-    cleartype:        !$.support.opacity,  // true if clearType corrections should be applied (for IE)
-    cleartypeNoBg:    false,    // set to true to disable extra cleartype fixing (leave false to force background color setting on slides)
-    containerResize:  1,        // resize container to fit largest slide
-    containerResizeHeight:  0,  // resize containers height to fit the largest slide but leave the width dynamic
-    continuous:       0,        // true to start next transition immediately after current one completes
-    cssAfter:         null,     // properties that defined the state of the slide after transitioning out
-    cssBefore:        null,     // properties that define the initial state of the slide before transitioning in
-    delay:            0,        // additional delay (in ms) for first transition (hint: can be negative)
-    easeIn:           null,     // easing for "in" transition
-    easeOut:          null,     // easing for "out" transition
-    easing:           null,     // easing method for both in and out transitions
-    end:              null,     // callback invoked when the slideshow terminates (use with autostop or nowrap options): function(options)
-    fastOnEvent:      0,        // force fast transitions when triggered manually (via pager or prev/next); value == time in ms
-    fit:              0,        // force slides to fit container
-    fx:               'fade',   // name of transition effect (or comma separated names, ex: 'fade,scrollUp,shuffle')
-    fxFn:             null,     // function used to control the transition: function(currSlideElement, nextSlideElement, options, afterCalback, forwardFlag)
-    height:           'auto',   // container height (if the 'fit' option is true, the slides will be set to this height as well)
-    manualTrump:      true,     // causes manual transition to stop an active transition instead of being ignored
-    metaAttr:         'cycle',  // data- attribute that holds the option data for the slideshow
-    next:             null,     // element, jQuery object, or jQuery selector string for the element to use as event trigger for next slide
-    nowrap:           0,        // true to prevent slideshow from wrapping
-    onPagerEvent:     null,     // callback fn for pager events: function(zeroBasedSlideIndex, slideElement)
-    onPrevNextEvent:  null,     // callback fn for prev/next events: function(isNext, zeroBasedSlideIndex, slideElement)
-    pager:            null,     // element, jQuery object, or jQuery selector string for the element to use as pager container
-    pagerAnchorBuilder: null,   // callback fn for building anchor links:  function(index, DOMelement)
-    pagerEvent:       'click.cycle', // name of event which drives the pager navigation
-    pause:            0,        // true to enable "pause on hover"
-    pauseOnPagerHover: 0,       // true to pause when hovering over pager link
-    prev:             null,     // element, jQuery object, or jQuery selector string for the element to use as event trigger for previous slide
-    prevNextEvent:    'click.cycle',// event which drives the manual transition to the previous or next slide
-    random:           0,        // true for random, false for sequence (not applicable to shuffle fx)
-    randomizeEffects: 1,        // valid when multiple effects are used; true to make the effect sequence random
-    requeueOnImageNotLoaded: true, // requeue the slideshow if any image slides are not yet loaded
-    requeueTimeout:   250,      // ms delay for requeue
-    rev:              0,        // causes animations to transition in reverse (for effects that support it such as scrollHorz/scrollVert/shuffle)
-    shuffle:          null,     // coords for shuffle animation, ex: { top:15, left: 200 }
-    skipInitializationCallbacks: false, // set to true to disable the first before/after callback that occurs prior to any transition
-    slideExpr:        null,     // expression for selecting slides (if something other than all children is required)
-    slideResize:      1,        // force slide width/height to fixed size before every transition
-    speed:            1000,     // speed of the transition (any valid fx speed value)
-    speedIn:          null,     // speed of the 'in' transition
-    speedOut:         null,     // speed of the 'out' transition
-    startingSlide:    undefined,// zero-based index of the first slide to be displayed
-    sync:             1,        // true if in/out transitions should occur simultaneously
-    timeout:          4000,     // milliseconds between slide transitions (0 to disable auto advance)
-    timeoutFn:        null,     // callback for determining per-slide timeout value:  function(currSlideElement, nextSlideElement, options, forwardFlag)
-    updateActivePagerLink: null,// callback fn invoked to update the active pager link (adds/removes activePagerClass style)
-    width:            null      // container width (if the 'fit' option is true, the slides will be set to this width as well)
+    activePagerClass:            'activeSlide',       // class name used for the active pager link
+    after:                       null,                // transition callback (scope set to element that was shown):  function(currSlideElement, nextSlideElement, options, forwardFlag)
+    allowPagerClickBubble:       false,               // allows or prevents click event on pager anchors from bubbling
+    animIn:                      null,                // properties that define how the slide animates in
+    animInDelay:                 0,                   // allows delay before next slide transitions in
+    animOut:                     null,                // properties that define how the slide animates out
+    animOutDelay:                0,                   // allows delay before current slide transitions out
+    aspect:                      false,               // preserve aspect ratio during fit resizing, cropping if necessary (must be used with fit option)
+    autostop:                    0,                   // true to end slideshow after X transitions (where X == slide count)
+    autostopCount:               0,                   // number of transitions (optionally used with autostop to define X)
+    backwards:                   false,               // true to start slideshow at last slide and move backwards through the stack
+    before:                      null,                // transition callback (scope set to element to be shown):     function(currSlideElement, nextSlideElement, options, forwardFlag)
+    center:                      null,                // set to true to have cycle add top/left margin to each slide (use with width and height options)
+    cleartype:                   !$.support.opacity,  // true if clearType corrections should be applied (for IE)
+    cleartypeNoBg:               false,               // set to true to disable extra cleartype fixing (leave false to force background color setting on slides)
+    containerResize:             1,                   // resize container to fit largest slide
+    containerResizeHeight:       0,                   // resize containers height to fit the largest slide but leave the width dynamic
+    continuous:                  0,                   // true to start next transition immediately after current one completes
+    cssAfter:                    null,                // properties that defined the state of the slide after transitioning out
+    cssBefore:                   null,                // properties that define the initial state of the slide before transitioning in
+    delay:                       0,                   // additional delay (in ms) for first transition (hint: can be negative)
+    easeIn:                      null,                // easing for "in" transition
+    easeOut:                     null,                // easing for "out" transition
+    easing:                      null,                // easing method for both in and out transitions
+    end:                         null,                // callback invoked when the slideshow terminates (use with autostop or nowrap options): function(options)
+    fastOnEvent:                 0,                   // force fast transitions when triggered manually (via pager or prev/next); value == time in ms
+    fit:                         0,                   // force slides to fit container
+    fx:                          'fade',              // name of transition effect (or comma separated names, ex: 'fade,scrollUp,shuffle')
+    fxFn:                        null,                // function used to control the transition: function(currSlideElement, nextSlideElement, options, afterCalback, forwardFlag)
+    height:                      'auto',              // container height (if the 'fit' option is true, the slides will be set to this height as well)
+    heightIncludesMargin:        false,               // include the margins when calculating the container height
+    manualTrump:                 true,                // causes manual transition to stop an active transition instead of being ignored
+    metaAttr:                    'cycle',             // data- attribute that holds the option data for the slideshow
+    next:                        null,                // element, jQuery object, or jQuery selector string for the element to use as event trigger for next slide
+    nowrap:                      0,                   // true to prevent slideshow from wrapping
+    onPagerEvent:                null,                // callback fn for pager events: function(zeroBasedSlideIndex, slideElement)
+    onPrevNextEvent:             null,                // callback fn for prev/next events: function(isNext, zeroBasedSlideIndex, slideElement)
+    pager:                       null,                // element, jQuery object, or jQuery selector string for the element to use as pager container
+    pagerAnchorBuilder:          null,                // callback fn for building anchor links:  function(index, DOMelement)
+    pagerEvent:                  'click.cycle',       // name of event which drives the pager navigation
+    pause:                       0,                   // true to enable "pause on hover"
+    pauseOnPagerHover:           0,                   // true to pause when hovering over pager link
+    prev:                        null,                // element, jQuery object, or jQuery selector string for the element to use as event trigger for previous slide
+    prevNextEvent:               'click.cycle',       // event which drives the manual transition to the previous or next slide
+    random:                      0,                   // true for random, false for sequence (not applicable to shuffle fx)
+    randomizeEffects:            1,                   // valid when multiple effects are used; true to make the effect sequence random
+    requeueOnImageNotLoaded:     true,                // requeue the slideshow if any image slides are not yet loaded
+    requeueTimeout:              250,                 // ms delay for requeue
+    rev:                         0,                   // causes animations to transition in reverse (for effects that support it such as scrollHorz/scrollVert/shuffle)
+    shuffle:                     null,                // coords for shuffle animation, ex: { top:15, left: 200 }
+    skipInitializationCallbacks: false,               // set to true to disable the first before/after callback that occurs prior to any transition
+    slideExpr:                   null,                // expression for selecting slides (if something other than all children is required)
+    slideResize:                 1,                   // force slide width/height to fixed size before every transition
+    speed:                       1000,                // speed of the transition (any valid fx speed value)
+    speedIn:                     null,                // speed of the 'in' transition
+    speedOut:                    null,                // speed of the 'out' transition
+    startingSlide:               undefined,           // zero-based index of the first slide to be displayed
+    sync:                        1,                   // true if in/out transitions should occur simultaneously
+    timeout:                     4000,                // milliseconds between slide transitions (0 to disable auto advance)
+    timeoutFn:                   null,                // callback for determining per-slide timeout value:  function(currSlideElement, nextSlideElement, options, forwardFlag)
+    updateActivePagerLink:       null,                // callback fn invoked to update the active pager link (adds/removes activePagerClass style)
+    width:                       null,                // container width (if the 'fit' option is true, the slides will be set to this width as well)
+    widthIncludesMargin:         false                // include the margins when calculating the container width
 };
 
 })(jQuery);
