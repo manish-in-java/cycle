@@ -150,6 +150,8 @@ function go(els, opts, manual, fwd) {
       queueNext(opts);
     }
 
+    if (p.cyclePause) queueNext();
+
     function queueNext(opts) {
         if (opts.timeout)
             p.cycleTimeout = setTimeout(function() { go(els,opts,0,!opts.rev); }, opts.timeout);
