@@ -2,7 +2,7 @@
  * jQuery Cycle Plugin (with Transition Definitions)
  * Examples and documentation at: http://jquery.malsup.com/cycle/
  * Copyright (c) 2007-2017 M. Alsup
- * Version: 3.0.4 (27-AUG-2017)
+ * Version: 3.0.5 (19-SEP-2017)
  * Dual licensed under the MIT and GPL licenses.
  * http://jquery.malsup.com/license.html
  * Requires: jQuery v1.7.1 or later
@@ -10,7 +10,7 @@
 ;(function($, undefined) {
 "use strict";
 
-var ver = '3.0.4';
+var ver = '3.0.5';
 
 function debug(s) {
 	if ($.fn.cycle.debug)
@@ -198,7 +198,7 @@ function handleArguments(cont, options, arg2) {
 }
 
 function removeFilter(el, opts) {
-	if (!$.support.opacity && opts.cleartype && el.style.filter) {
+	if (opts.cleartype && el.style.filter) {
 		try { el.style.removeAttribute('filter'); }
 		catch(smother) {} // handle old opera versions
 	}
@@ -241,7 +241,7 @@ function buildOptions($cont, $slides, els, options, o) {
 	opts.after = opts.after ? [opts.after] : [];
 
 	// push some after callbacks
-	if (!$.support.opacity && opts.cleartype)
+	if (opts.cleartype)
 		opts.after.push(function() { removeFilter(this, opts); });
 	if (opts.continuous)
 		opts.after.push(function() { go(els,opts,0,!opts.backwards); });
@@ -249,7 +249,7 @@ function buildOptions($cont, $slides, els, options, o) {
 	saveOriginalOpts(opts);
 
 	// clearType corrections
-	if (!$.support.opacity && opts.cleartype && !opts.cleartypeNoBg)
+	if (opts.cleartype && !opts.cleartypeNoBg)
 		clearTypeFix($slides);
 
 	// container requires non-static position so that slides can be position within
@@ -573,7 +573,7 @@ function exposeAddSlide(opts, els) {
 			opts.nextSlide++;
 		}
 
-		if (!$.support.opacity && opts.cleartype && !opts.cleartypeNoBg)
+		if (opts.cleartype && !opts.cleartypeNoBg)
 			clearTypeFix($s);
 
 		if (opts.fit && opts.width)
